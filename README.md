@@ -1,6 +1,5 @@
 # Problem Solver
-#### Avik Kadkaia Eugene Stark
-
+#### Avik Kadakia Eugene Stark
 
 ## Introduction
 
