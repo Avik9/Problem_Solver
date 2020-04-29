@@ -45,25 +45,20 @@ Here is the structure of the base code:
 If you run `make`, the code should compile correctly, resulting in three
 executables `bin/polya`, `bin/polya_worker`, and `bin/polya_test`.
 The executable `bin/polya` is the main one, for the "master" process.
-If you run this program, it doesn't do very much, because the main functions
-are just stubs -- you have to write them!
+
 The executable `bin/polya_worker` is the executable run by "worker" processes.
 It is invoked by the master process -- it is not designed to be invoked from
 the command line.
-The executable `bin/polya_tests` runs some tests using Criterion, as usual.
-However, the default tests supplied with the base code use the fully implemented
-executable `demo/polya` for the master process instead of `bin/polya`,
-which needs a lot of details filled in by you.  Using `demo/polya` will allow
-you to get started more easily by first implementing and testing the code for
-the worker processes and then progressing to the implementation of the code
-for the master process, which is more complex.
+
+The executable `bin/polya_tests` runs some tests using Criterion.
+Using `demo/polya` will display the perfect implementation of the 
+program while `bin/polya` will display my omplementation of the program..
 
 ### The `killall` Command
 
-In the course of debugging this program, you will almost certainly end up in
-situations where there are a number of "leftover" worker processes that have survived
-beyond a particular test run of the program.  If you allow these processes to
-accumulate, it can cause confusion, as well as consume resources on your computer.
+SOmetimes, there will be a number of "leftover" worker processes that have survived
+beyond a particular test run of the program.  If one allows these processes to
+accumulate, it can cause confusion, as well as consume resources on the device.
 The `ps(1)` (process status) command can be used to determine if there are any
 such processes around; e.g.
 
@@ -134,13 +129,6 @@ itself is executed using one of the system calls in the the `exec(3)` family .
 "Unix I/O" `read(2)` and `write(2)` system calls, or else (probably somewhat more conveniently)
 using the standard I/O library, after using `fdopen(3)` to wrap the pipe file descriptors
 in `FILE` objects.
-
-  > **Important:**  You **must** create pipes using the `pipe()` function, you must
-  > create the worker processes using `fork()` and you must execute the
-  > worker program using some form of `exec` (such as `execl()`).  You **must not**
-  > use the `system()` function, nor use any form of shell in order to do this things,
-  > as the purpose of the assignment is to give you experience with direct use of the
-  > system calls involved in doing these things.
 
 When the master process wants to send a problem to a worker process, it first writes
 the fixed-size problem header to the pipe, and then continues by writing the problem
@@ -236,11 +224,11 @@ The number of leading zero bits required for a solution allows the "difficulty" 
 problem to be solved to be adjusted: requiring fewer zero bits makes it easier to solve
 the problem and requiring more zero bits makes it harder.
 The nature of this kind of problem makes concurrency useful in solving it:
-we can just partition the space of all possible nonce values into disjoint subsets,
+it just partitions the space of all possible nonce values into disjoint subsets,
 and assign a separate concurrent process to work on each subset.
 
 For the "crypto miner" solver included with the basecode, "blocks" are just filled with
-random data (because we are not really trying to process transactions) and the SHA256
+random data and the SHA256
 hash algorithm is used to hash the block contents, followed by a 8-byte nonce
 (the Bitcoin system actually uses something like three rounds of the older SHA1 hash
 algorithm rather than one round of SHA256).
@@ -264,16 +252,14 @@ current problem if a solution has indeed been found.
 The problem module has been introduced basically to encapsulate the creation and
 management of problems to be solved (which is not our primary interest here)
 from the mechanism by which the problems are solved by concurrent worker processes
-(which is our main interest).  The problems that we create are just built from
+(which is our main interest).  The problems that it creates are just built from
 random data, though it would also be possible to have some of the "constructor"
-methods read real problem data from a file.  Your master process will have to call
-methods of the problem source to obtain problems and post solutions, but otherwise
-you should not worry about how this all works, or even how meaningful it might all be.
+methods read real problem data from a file.  The master process will call
+methods of the problem source to obtain problems and post solutions.
 
-### Functions You Must Implement
+### Functions I Implemented
 
-As part of your implementation of `polya`, you are to provide implementations for
-the following two functions:
+I provided the implementations for the following two functions:
 
 * `int master(int workers);` -- Main function for the master process.
 
@@ -304,12 +290,11 @@ the following two functions:
 	from the master process, at which point the worker process terminates by calling
 	`exit(3)` with exit status `EXIT_SUCCESS`.
 
-### Event Functions You Must Call
+### Event Functions Called
 
-In order to make it possible for us to trace the actions of your program,
-we have provided several functions that you **must** call in particular situations
-from within your master process (your worker processes should not call any of
-these functions).  The provided functions are:
+In order to make it possible to trace the actions of the program,
+there are several functions that were called in particular situations
+from within the master process. The provided functions are:
 
 * `void sf_start(void);`
 
@@ -347,15 +332,6 @@ these functions).  The provided functions are:
     process that the current solution attempt is to be canceled.  The `pid`
 	parameter is the process ID of the worker process that is being notified.
 
-The above functions are provided to you as an object file that will be linked with
-your master program.  As implemented in the basecode, these functions will announce
-on `stderr` that they have been called, so that you can verify that you are
-calling them properly.  Should you desire not to see this printout, you can
-set the global variable `sf_suppress_chatter` to a nonzero value.
-When we grade your program, we will replace the basecode implementations of
-these functions with different versions that will allow us to track automatically
-whether events are actually occurring in the order they are supposed to be.
-
 ### Command-Line Arguments
 
 The master program (exectuable `bin/polya`) has the following usage synopsis:
@@ -370,9 +346,6 @@ where:
  * `prob_type` is an integer specifying a problem type whose solver
     is to be enabled (min 0, max 31).  The -t flag may be repeated to enable
     multiple problem types.
-
-These options have already been implemented in the `main.c` that is provided
-in the base code.  You should not have to change this.
 
 The worker program, whose executable is `bin/polya_worker` and whose `main()`
 function is in the file `worker_main.c()`, ignores its command-line arguments.
@@ -391,20 +364,13 @@ A `polya_worker` worker process must install handlers for `SIGHUP` and `SIGTERM`
 As already discussed, the `SIGHUP` signal is sent by the master process to notify
 a worker to cancel its current solution attempt.
 A `SIGTERM` signal is sent by the master to cause graceful termination of a
-worker process.  Note that if you do not catch `SIGTERM`, receipt of a `SIGTERM`
-signal will cause the termination of a worker process, but the exit status
-of that process as returned from `waitpid(2)` will show the process as having
-terminated abnormally by a signal, rather than normally via `exit()`.
-Termination by a signal does not count as "graceful".
+worker process.
 
-If you want your programs to work reliably, you must only use async-signal-safe
-functions in your signal handlers.
-You should make every effort not to do anything "complicated" in a signal handler;
-rather the handlers should just set flags to communicate back to the main program
-what has occurred and the main program should check these flags and perform whatever
-actions are necessary.
-Variables used for communication between the handler and the main program should
-generally be declared `volatile` so that a handler will always see values that
+If order for the programs to work reliably, it only uses async-signal-safe
+functions in the signal handlers.
+
+Variables used for communication between the handler and the main program are 
+declared `volatile` so that a handler will always see values that
 are up-to-date (otherwise, the C compiler might generate code to cache updated
 values in a register for an indefinite period, which could make it look to a
 handler like the value of a variable has not been changed when in fact it has).
@@ -416,12 +382,6 @@ instruction.  This means that it would be possible for a signal handler to be
 invoked "in the middle" of such an operation, which could lead to "flaky"
 behavior if it were to occur.
 
-  > :nerd: Note that you will need to use `sigprocmask()` to block signals at
-  > appropriate times, to avoid races between the handler and the main program,
-  > the occurrence of which can also result in indeterminate behavior.
-  > In general, signals must be blocked any time the main program is actively
-  > involved in manipulating variables that are shared with a signal handler.
-
 Note that standard I/O functions such as `fprintf()` are not async-signal-safe,
 and thus cannnot reliably be used in signal handlers.  For example, suppose the
 main program is in the middle of doing an `fprintf()` when a signal handler is invoked
@@ -430,12 +390,7 @@ of `fprintf()` share state (not just the `FILE` objects that are being printed t
 but also static variables used by functions that do output formatting).
 The `fprintf()` in the handler can either see an inconsistent state left by the
 interrupted `fprintf()` of the main program, or it can make changes to this state that
-are then visible upon return to the main program.  Although it can be quite useful
-to put debugging printout in a signal handler, you should be aware that you can
-(and quite likely will) see anomalous behavior resulting from this, especially
-as the invocations of the handlers become more frequent.  Definitely be sure to
-remove or disable this debugging printout in any "production" version of your
-program, or you risk unreliability.
+are then visible upon return to the main program.  
 
 ### Reading Input and Writing Output
 
@@ -463,134 +418,75 @@ If the standard I/O library is used, then `fflush()` should be called once
 the entire problem has been written, to be sure that all the data is immediately
 pushed into the pipe.
 
-Reading a problem from a pipe involves the reverse procedure.  First we read
+Reading a problem from a pipe involves the reverse procedure.  First it reads
 `sizeof(struct problem)` bytes from the input and store it into a `struct problem`
-variable.  Then, we examine the `size` field of this structure and read an
-additional `size - sizeof(struct problem)` bytes.  Since once we have read the
-header we know how many bytes of additional data we have to read, we can use
-`malloc()` to allocate storage for this data.  Although once again the reading
-can be done using either the low-level `read(2)` call or a higher-level
-standard I/O library call such as `fgetc()`, in view of the buffering that takes
-place in the standard I/O library you really have to pick one way or the other
-of doing things and not try to "mix-and-match".  Probably the standard I/O
-library is more convenient.
+variable.  Then, it examines the `size` field of this structure and read an
+additional `size - sizeof(struct problem)` bytes.  Since once it has read the
+header it knows how many bytes of additional data it has to read, it can use
+`malloc()` to allocate storage for this data.
 
-Note that, when reading or writing a `struct problem` header, we are treating it
+Note that, when reading or writing a `struct problem` header, it is treating it
 simply as a sequence of `sizeof(struct problem)` bytes to be read or written.
 The bytes are written out in the order in which they occur in memory
 (*i.e.* in increasing address order), and they are read back into memory in the
 same order.  As long as the reading and writing is being done on the same system,
 with the same "endianness", the values of multibyte fields (such as the `size`
 field) in the structure will be preserved.  However, note that the simple technique
-that we are using here will not preserve the values of such fields, in general,
+that it will use here will not preserve the values of such fields, in general,
 if the reading and writing is performed on systems with different "endiannesses",
-as they might be if the stream on which we are writing is a network connection to
-a computer of a different type, or if we are writing the data to a disk file on one
+as they might be if the stream on which it is writing is a network connection to
+a computer of a different type, or if it is writing the data to a disk file on one
 system and reading it back into memory on a different system.
-We will not worry about this issue for the current assignment.
 
 ## Provided Components
 
 ### The `polya.h` Header File
 
-The `polya.h` header file that we have provided defines various constants and
+The `polya.h` header file defines various constants and
 data structures shared between different parts of the `polya` system,
-gives function prototypes for the functions that you are to use and those that
-you are to implement, and contains specifications for these functions that you
-should read carefully in conjunction with the information provided in the
+gives function prototypes for the functions that are to used 
+and contains specifications for these functions that
+should be read carefully in conjunction with the information provided in the
 present assignment document.
-
-  > :scream: **Do not make any changes to `polya.h`.  It will be replaced
-  > during grading, and if you change it, you will get a zero!**
 
 ### The `main.c` Source File
 
 The `main.c` file contains the `main()` function for the `polya` master program,
-whose executable is left by `make` in `bin/polya`.  It already contains code
+whose executable is left by `make` in `bin/polya`.  It contains code
 to process command-line arguments.
-**It will be replaced during grading -- don't change it.**
 
 ### The `worker_main.c` Source File
 
 The `main.c` file contains the `main()` function for the `polya` worker program,
-whose executable is left by `make` in `bin/polya_worker`.  **It will be replaced
-during grading -- don't change it.**
+whose executable is left by `make` in `bin/polya_worker`.
 
 ### The `problem.c` Source File
 
 The `problem.c` file contains the functions that implement the "problem source"
 module.  The `init_problems` function is called from `main.c` and `worker_main.c`.
-You will need to call `get_problem_variant` and `post_result` from your master
-process.  **This file will be replaced during grading -- don't change it.**
 
 ### The `trivial.c` Source File
 
 The `trivial.c` file implements the solver for the "trivial" problem type.
-You have been provided with the source code because there is no reason to conceal
-it and you might learn something from studying it.  **This file will be replaced
-during grading -- don't change it.**
 
 ### The `crypto_miner.c` Source File
 
 The `crypto miner.c` file implements the solver for the "crypto miner" problem type.
-You have been provided with the source code because there is no reason to conceal
-it and you might learn something from studying it.  **This file will be replaced
-during grading -- don't change it.**
 
 ### The `master.c` Source File
 
-The `master.c` file contains a stub for the `master()` function that you are to
-implement.  Put your implementation of this function in this file.
-You may also create helper files, if you like.
+The `master.c` file contains a stub for the `master()` function that have been
+implementd.
 
 ### The `worker.c` Source File
 
-The `worker.c` file contains a stub for the `worker()` function that you are to
-implement.  Put your implementation of this function in this file.
-You may also create helper files, if you like.
+The `worker.c` file contains a stub for the `worker()` function that is
+implemented.
 
 ### The `lib/sf_event.o` Object File
 
 The `lib/sf_event.o` object file contains implementations of the functions that
-you are to call upon occurrence of various events (see *Event Functions* above).
-This file will be linked with your master program.  As indicated above, the basecode
+are to be called upon occurrence of various events (see *Event Functions* above).
+This file will be linked with the master program.  As indicated above, the basecode
 implementation simply prints a message on `stderr` each time one of the functions
-is called.  During grading, we will replace this implementation with a different
-one, which will help us to automatically track the actions of your program.
-
-### The `demo/polya` Executable
-
-To help answer questions about what you are expected to implement and to make
-it easier for you to get something working that you can test, I have included a
-demonstration version of the master program as `demo/polya`.
-You invoke this program by typing `demo/polya`, giving it the same command-line
-arguments as what your master program will take.
-The `demo/polya` program expects to execute `bin/polya_worker` as the worker
-program.  It prints out fairly extensive debugging trace output to help you
-understand what is going on.
-
-Given the presence of `demo/polya`, your best strategy for attacking this assignment
-is probably to first work on implementing your `worker()` function, using the
-`demo/polya` program as a test driver for it.  You will be able to fill in functionality
-of the worker process a bit at a time and the debugging trace produced by `demo/polya`
-will help you through the rough spots.  Try it first with just one worker process,
-until you are pretty sure that things are working well that way.  Then proceed to multiple
-worker processes, which will produce more complex behaviors.
-
-Once you have completed your `worker()` function, you can then work on implementing
-your `master()` function; ultimately using your own `bin/polya` as the driver program
-rather than `demo/polya`.
-
-### Sample Traces
-
-To help you out even more, I have provided below debugging traces of the execution of
-the complete `polya` system when tests are run with the following command:
-
-```
-bin/polya_tests --verbose -j1 --filter demo_master_suite/miner_test_three_workers
-```
-
-Debugging trace output is provided from both the worker and master processes,
-but because I don't want to unduly bias you as to how to organize your code,
-I have used a version of the debugging macros that omits the source file name,
-line number, and function name.
+is called.
