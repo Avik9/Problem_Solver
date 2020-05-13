@@ -72,6 +72,10 @@ struct solver_methods crypto_miner_solver_methods = {
 
 void crypto_miner_solver_init(void) {
     solvers[CRYPTO_MINER_PROBLEM_TYPE] = crypto_miner_solver_methods;
+    // The gcrypt library documentation says you have to do this, but they
+    // don't make it particularly obvious.  I found out about it by looking
+    // at spew in the syslog.
+    gcry_check_version(NULL);
 }
 
 /*

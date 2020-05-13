@@ -43,7 +43,9 @@
 #define TRIVIAL_PROBLEM_TYPE      1
 #define CRYPTO_MINER_PROBLEM_TYPE 2
 
-#define NUM_PROBLEM_TYPES         3
+#define CANCEL_PROBLEM_TYPE       3
+
+#define NUM_PROBLEM_TYPES         4
 
 /*
  * Format of a "problem".

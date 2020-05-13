@@ -25,7 +25,7 @@ STD := -std=c11
 POSIX := -D_POSIX_SOURCE
 BSD := -D_DEFAULT_SOURCE
 TEST_LIB := -lcriterion
-LIBS := -lgcrypt
+LIBS := -lgcrypt -lpthread
 MASTER_LIBS := $(LIBS) $(LIBD)/sf_event.o -lm
 
 CFLAGS += $(STD) $(POSIX) $(BSD)
@@ -54,7 +54,7 @@ $(BIND)/$(WORKER_EXEC): $(ALL_OBJF)
 	$(CC) $(BLDD)/worker_main.o $(BLDD)/worker.o $(FUNC_FILES) -o $@ $(LIBS)
 
 $(BIND)/$(TEST): $(FUNC_FILES) $(TEST_SRC)
-	$(CC) $(CFLAGS) $(INC) $(TEST_SRC) $(TEST_LIB) $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(INC) $(TEST_SRC) $(BLDD)/rdwr.o $(TEST_LIB) $(LIBS) -o $@
 
 $(BLDD)/%.o: $(SRCD)/%.c
 	$(CC) $(CFLAGS) $(INC) -c -o $@ $<

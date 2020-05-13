@@ -1,0 +1,17 @@
+Graded Commit:16efe5f1a69f9c9b67d1b3f54e8bee12ab298e16
+
+TEST NAME, POINTS,OUT OF
+tracker_suite/cancellation_test,1,1,
+tracker_suite/many_workers_many_trivial_test,0,1,1 assertion(s) failed.: tests/__helper.c:21: The test driver returned an error (-1)
+tracker_suite/many_workers_several_crypto_test,1,1,
+tracker_suite/many_workers_several_mixed_test,1,1,
+tracker_suite/one_worker_multi_crypto_test,1,1,
+tracker_suite/one_worker_multi_trivial_test,0,1,1 assertion(s) failed.: tests/__helper.c:21: The test driver returned an error (-1)
+tracker_suite/one_worker_one_crypto_test,1,1,
+tracker_suite/one_worker_one_trivial_test,0,1,1 assertion(s) failed.: tests/__helper.c:21: The test driver returned an error (-1)
+tracker_suite/start_end_test,1,1,
+tracker_suite/two_workers_multi_crypto_test,1,1,
+tracker_suite/two_workers_multi_trivial_test,0,1,1 assertion(s) failed.: tests/__helper.c:21: The test driver returned an error (-1)
+tracker_suite/two_workers_one_crypto_test,1,1,
+tracker_suite/two_workers_one_trivial_test,0,1,1 assertion(s) failed.: tests/__helper.c:21: The test driver returned an error (-1)
+total,8,13

@@ -66,5 +66,10 @@ int main(int argc, char *argv[])
 	}
     }
     init_problems(nprobs, mask);
-    return master(nworkers);
+    int err = master(nworkers);
+    if(err == EXIT_SUCCESS && get_problem_variant(nworkers, 0) != NULL) {
+      fprintf(stderr, "Master reports success, but not all problems were solved\n");
+      exit(EXIT_FAILURE);
+    }
+    return err;
 }

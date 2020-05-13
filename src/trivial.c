@@ -62,6 +62,7 @@ static struct problem *trivial_construct(int id, int nvars) {
  */
 static void trivial_vary(struct problem *prob, int var) {
     // Does nothing.
+    prob->var = 0;
     return;
 }
 
@@ -83,6 +84,7 @@ static struct result *trivial_solve(struct problem *aprob, volatile sig_atomic_t
 	return NULL;
     memset(result, 0, sizeof(*result));
     result->size = sizeof(*result);
+    result->id = aprob->id;
     debug("[%d:Worker] Returning result (size = %ld, failed = %d)",
 	  getpid(), result->size, result->failed);
     return result;

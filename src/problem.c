@@ -40,9 +40,10 @@ static unsigned int prob_type_mask;
 /* Table of solver initialization functions. */
 extern void trivial_solver_init(void);
 extern void crypto_miner_solver_init(void);
+extern void cancel_solver_init(void);
 
 void (*solver_initializers[NUM_PROBLEM_TYPES])(void) = {
-    NULL, trivial_solver_init, crypto_miner_solver_init
+    NULL, trivial_solver_init, crypto_miner_solver_init, cancel_solver_init
 };
 
 /*
@@ -124,6 +125,8 @@ static void new_problem(int type, int nvars) {
 		current_problem = solvers[type].construct(id, nvars, block, sizeof(block), 8, 25);
 	    }
 	    return;
+	case CANCEL_PROBLEM_TYPE:
+		current_problem = solvers[type].construct(id, nvars);
 	default:
 	    return;
 	}
@@ -152,4 +155,12 @@ int post_result(struct result *result, struct problem *prob) {
 	debug("[%d:Master] Posted result does not solve the problem", getpid());
 	return 1;
     }
+}
+
+/**
+ * Added as a hook for problems_remaining
+ * @returns problems_remaining
+ */
+int __get_problems_remaining() {
+	return problems_remaining;
 }
